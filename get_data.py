@@ -4,8 +4,8 @@ import streamlit as st
 
 
 @st.cache_data
-def load_data(nrows):
-    data = pd.read_csv(DATA_URL, nrows=nrows)
+def load_data():
+    data = pd.read_csv(DATA_URL)
     def lowercase(x): return str(x).lower()
     data.rename(lowercase, axis='columns', inplace=True)
     return data
