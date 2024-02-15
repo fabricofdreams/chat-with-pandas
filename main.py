@@ -3,6 +3,7 @@ from config import AUTHOR
 from get_data import load_data
 import pandas as pd
 import numpy as np
+import altair as alt
 
 
 def main():
@@ -27,22 +28,18 @@ def main():
     # Select columns to display
     st.sidebar.title("Filtering data")
     columns = data.columns.tolist()
-    data_selected_columns = st.sidebar.multiselect('Select columns', columns)
 
-    # if len(data_selected_columns) > 0:
-    #     st.subheader('Selected columns')
-    #     st.write(data[data_selected_columns])
+    columns.pop(columns.index('Date'))
+
+    data_selected_columns = st.sidebar.multiselect(
+        'Select columns', columns)
 
     # Select time window
     st.sidebar.title("Sorting data")
-    # data['Date'] = pd.to_datetime(
-    #     data['Date'], format='mixed', utc=True)
 
     min_date = data['Date'].min()
     max_date = data['Date'].max()
 
-    # min_year = min_date.date().year
-    # max_year = max_date.date().year
     min_year = min_date.year
     max_year = max_date.year
 
@@ -64,11 +61,10 @@ def main():
     max_date_selected = pd.to_datetime(
         str(max_year_selected) + '-12-31').date()
 
-    st.write(min_date_selected)
-
     # Display selected columns within the selected time window
     if len(data_selected_columns) > 0 and len(year_range_selected) > 0:
-        st.subheader('Selected columns within the selected time window')
+        data_selected_columns = ['Date'] + data_selected_columns
+        st.subheader('Filtered and Sorted data')
         st.write("Data selected from year {min_year} to year {max_year}".format(
             min_year=min_year_selected, max_year=max_year_selected))
 
@@ -76,9 +72,30 @@ def main():
                              (data['Date'] <= max_date_selected)]
 
         count_filtered_data_header = str(filtered_data.shape[0])
-        st.write("Total number of rows: ", count_filtered_data_header)
+
+        st.write("Total number of rows filtered: ", count_filtered_data_header)
 
         st.write(filtered_data[data_selected_columns])
+
+        # Tuple with selected columns
+        selected_columns = tuple(data_selected_columns)
+
+        # Chart area with selected columns
+        st.sidebar.title("Graphs")
+        feature_selected = st.sidebar.selectbox('Select feature to plot',
+                                                options=selected_columns[1:], placeholder='Select a feature')
+
+        # Create a figure
+        st.subheader('Graphs')
+
+        chart = pd.DataFrame(filtered_data[data_selected_columns])
+
+        fig = (
+            alt.Chart(chart)
+            .mark_bar()
+            .encode(x='Date', y=alt.Y(str(feature_selected)+':Q')))
+
+        st.altair_chart(fig, use_container_width=True)
 
 
 if __name__ == '__main__':
