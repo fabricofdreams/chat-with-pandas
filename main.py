@@ -9,8 +9,10 @@ def main():
     st.title("Earthquakes Data Analysis")
     # Create a text element and let the reader know the data is loading.
     data_load_state = st.sidebar.text('Loading data...')
+
     # Load data into the dataframe.
     data = load_data()
+
     # Notify the reader that the data was successfully loaded.
     data_load_state.text("Dataset is loaded!")
 
@@ -27,19 +29,22 @@ def main():
     columns = data.columns.tolist()
     data_selected_columns = st.sidebar.multiselect('Select columns', columns)
 
-    if len(data_selected_columns) > 0:
-        st.subheader('Selected columns')
-        st.write(data[data_selected_columns])
+    # if len(data_selected_columns) > 0:
+    #     st.subheader('Selected columns')
+    #     st.write(data[data_selected_columns])
 
     # Select time window
     st.sidebar.title("Sorting data")
-    data['Date'] = pd.to_datetime(data['Date'], format='mixed', utc=True)
+    # data['Date'] = pd.to_datetime(
+    #     data['Date'], format='mixed', utc=True)
 
     min_date = data['Date'].min()
     max_date = data['Date'].max()
 
-    min_year = min_date.date().year
-    max_year = max_date.date().year
+    # min_year = min_date.date().year
+    # max_year = max_date.date().year
+    min_year = min_date.year
+    max_year = max_date.year
 
     def get_range(): return np.array(range(min_year, max_year + 1))
 
@@ -54,17 +59,26 @@ def main():
     min_year_selected = year_range_selected[0]
     max_year_selected = year_range_selected[1]
 
+    min_date_selected = pd.to_datetime(
+        str(min_year_selected) + '-01-01').date()
+    max_date_selected = pd.to_datetime(
+        str(max_year_selected) + '-12-31').date()
+
+    st.write(min_date_selected)
+
     # Display selected columns within the selected time window
-    st.subheader('Selected columns within the selected time window')
-    st.write("Data selected from year {min_year} to year {max_year}".format(
-        min_year=min_year_selected, max_year=max_year_selected))
+    if len(data_selected_columns) > 0 and len(year_range_selected) > 0:
+        st.subheader('Selected columns within the selected time window')
+        st.write("Data selected from year {min_year} to year {max_year}".format(
+            min_year=min_year_selected, max_year=max_year_selected))
 
-    filtered_data = data[(data['Date'] >= str(min_year_selected)) &
-                         (data['Date'] <= str(max_year_selected))]
+        filtered_data = data[(data['Date'] >= min_date_selected) &
+                             (data['Date'] <= max_date_selected)]
 
-    st.write(filtered_data[data_selected_columns])
-    # count_filtered_data_header = filtered_data.shape[0]
-    # st.write("Total number of rows: ", count_filtered_data_header)
+        count_filtered_data_header = str(filtered_data.shape[0])
+        st.write("Total number of rows: ", count_filtered_data_header)
+
+        st.write(filtered_data[data_selected_columns])
 
 
 if __name__ == '__main__':
