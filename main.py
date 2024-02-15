@@ -2,6 +2,7 @@ import streamlit as st
 from config import AUTHOR
 from get_data import load_data
 import pandas as pd
+import numpy as np
 
 
 def main():
@@ -22,7 +23,7 @@ def main():
     st.write(data_header)
 
     # Select columns to display
-    st.sidebar.title('Variables')
+    st.sidebar.title("Filtering data")
     columns = data.columns.tolist()
     data_selected_columns = st.sidebar.multiselect('Select columns', columns)
 
@@ -31,26 +32,39 @@ def main():
         st.write(data[data_selected_columns])
 
     # Select time window
-    dates = pd.to_datetime(data['date'], format='mixed', utc=True)
-    min_year = dates.min().date().year
-    max_year = dates.max().date().year
-    st.sidebar.title('Time window')
+    st.sidebar.title("Sorting data")
+    data['Date'] = pd.to_datetime(data['Date'], format='mixed', utc=True)
 
-    st.sidebar.write(f'Min year: {min_year}')
-    st.sidebar.write(f'Max year: {max_year}')
+    min_date = data['Date'].min()
+    max_date = data['Date'].max()
 
-    year_selected = st.sidebar.slider('Year', min_year, max_year, 2010)
+    min_year = min_date.date().year
+    max_year = max_date.date().year
+
+    def get_range(): return np.array(range(min_year, max_year + 1))
+
+    range_years = get_range()
+    value = (min_year, max_year)
+
+    st.sidebar.header('Sorting by years')
+
+    year_range_selected = st.sidebar.select_slider(
+        'Select range of years', options=range_years, value=value)
+
+    min_year_selected = year_range_selected[0]
+    max_year_selected = year_range_selected[1]
 
     # Display selected columns within the selected time window
     st.subheader('Selected columns within the selected time window')
-    st.write("Data selected from year {year_selected} to year {max_year}".format(
-        year_selected=year_selected, max_year=max_year))
+    st.write("Data selected from year {min_year} to year {max_year}".format(
+        min_year=min_year_selected, max_year=max_year_selected))
 
-    filtered_data = data[data['date'].str.contains(str(year_selected))]
+    filtered_data = data[(data['Date'] >= str(min_year_selected)) &
+                         (data['Date'] <= str(max_year_selected))]
 
     st.write(filtered_data[data_selected_columns])
-    count_filtered_data_header = filtered_data.shape[0]
-    st.write("Total number of rows: ", count_filtered_data_header)
+    # count_filtered_data_header = filtered_data.shape[0]
+    # st.write("Total number of rows: ", count_filtered_data_header)
 
 
 if __name__ == '__main__':
