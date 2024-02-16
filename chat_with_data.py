@@ -4,6 +4,7 @@ from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe
 from langchain.agents.agent_types import AgentType
 from langchain_openai import ChatOpenAI
 from ai_functions import *
+import pandas as pd
 
 
 def chat_with_pd(user_csv):
@@ -20,7 +21,7 @@ def chat_with_pd(user_csv):
 
     if user_query is not None and user_query != '':
       # Agent
-        llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-0613")
+        llm = ChatOpenAI(temperature=0.2, model="gpt-3.5-turbo-0613")
         agent = create_pandas_dataframe_agent(
             llm, user_csv, verbose=True, agent_type=AgentType.OPENAI_FUNCTIONS)
 

@@ -12,14 +12,14 @@ def main():
     # Get, filter and sort data
     data_to_chat_with = show_data()
 
-    st.write(data_to_chat_with)
-
     if data_to_chat_with is None:
         st.write("No data to chat with")
+    else:
+        st.write("Data to chat with is ready!")
 
-    # Chat with data
-    st.subheader("Chat with the Filtered Data")
-    chat_with_pd(data_to_chat_with)
+        # Chat with data
+        st.subheader("Chat with the Filtered Data")
+        chat_with_pd(data_to_chat_with)
 
 
 if __name__ == '__main__':

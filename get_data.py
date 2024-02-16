@@ -3,6 +3,7 @@ import numpy as np
 import altair as alt
 from config import DATA_URL, AUTHOR
 import streamlit as st
+from geopy.geocoders import Nominatim
 
 
 @st.cache_data
@@ -118,3 +119,11 @@ def show_data():
         st.caption('This a graph created based on the filtered and sorted data.')
 
         return sorted_data
+
+
+def get_country_name(latitude, longitude):
+    geolocator = Nominatim(user_agent="my-app")
+    location = geolocator.reverse((latitude, longitude), exactly_one=True)
+    address = location.raw['address']
+    country = address.get('country', '')
+    return country
